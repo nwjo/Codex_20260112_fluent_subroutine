@@ -195,10 +195,9 @@ static inline real gas_conc_cell(cell_t c0, Thread *t0, real yi_k, real MW_k)
 
 
 /* calculate sticking coefficient */
-static inline real A_from_sticking(real S0, real M_kg_per_kmol, real Gamma_kmol_m2, real q_site)
+static inline real A_from_sticking(real S0, real M_kg_per_kmol, real q_site)
 {
     const real root = sqrt( UNIVERSAL_GAS_CONSTANT / MAX(EPS, 2.0*M_PI*M_kg_per_kmol) ); /*  [m/s]/sqrt(K) */
-    (void)Gamma_kmol_m2;
     const real invG = pow( 1.0 / MAX(EPS, SITE_DEN_TOT), q_site );
     return S0 * root * invG;  /* [m/s]*(1/gamma^q) */
 }
@@ -220,7 +219,7 @@ static const real eps_r1_ex[]        = {0.0};
 #define mu_r1           mu_r1_ex
 #define eps_r1          eps_r1_ex
 #define NS_R1   0       /* coverage denpendency species number -> 0 for independent */
-#define A1_k    A_from_sticking(S0_O2, MW_O2, SITE_DEN_Pt, q_R1)
+#define A1_k    A_from_sticking(S0_O2, MW_O2, q_R1)
 #define B1_beta 0.5
 #define Ea1_Jpm 0.0     /* [J/kmol] */
 
@@ -232,7 +231,7 @@ static const real eps_r2_ex[]        = {0.0};
 #define mu_r2           mu_r2_ex
 #define eps_r2          eps_r2_ex
 #define NS_R2   0
-#define A2_k    A_from_sticking(S0_C3H6, MW_C3H6, SITE_DEN_Pt, q_R2)
+#define A2_k    A_from_sticking(S0_C3H6, MW_C3H6, q_R2)
 #define B2_beta 0.5
 #define Ea2_Jpm 0.0     /* [J/kmol] */
 
@@ -244,7 +243,7 @@ static const real eps_r3_ex[]      = { 0.0         };
 #define mu_r3           mu_r3_ex
 #define eps_r3          eps_r3_ex
 #define NS_R3   1       /* Pt(s) */
-#define A3_k    A_from_sticking(S0_C3H6_O, MW_C3H6, SITE_DEN_Pt, q_R3)
+#define A3_k    A_from_sticking(S0_C3H6_O, MW_C3H6, q_R3)
 #define B3_beta 0.5
 #define Ea3_Jpm 0.0     /* [J/kmol] */
 
@@ -256,7 +255,7 @@ static const real eps_r4_ex[]        = { 0.0        };
 #define mu_r4           mu_r4_ex
 #define eps_r4          eps_r4_ex
 #define NS_R4   1
-#define A4_k    A_from_sticking(S0_H2, MW_H2, SITE_DEN_Pt, q_R4)
+#define A4_k    A_from_sticking(S0_H2, MW_H2, q_R4)
 #define B4_beta 0.5
 #define Ea4_Jpm 0.0     /* [J/kmol] */
 
@@ -268,7 +267,7 @@ static const real eps_r5_ex[]        = {0.0};
 #define mu_r5           mu_r5_ex
 #define eps_r5          eps_r5_ex
 #define NS_R5   0
-#define A5_k    A_from_sticking(S0_H2O, MW_H2O, SITE_DEN_Pt, q_R5)
+#define A5_k    A_from_sticking(S0_H2O, MW_H2O, q_R5)
 #define B5_beta 0.5
 #define Ea5_Jpm 0.0     /* [J/kmol] */
 
@@ -280,7 +279,7 @@ static const real eps_r6_ex[]        = {0.0};
 #define mu_r6           mu_r6_ex
 #define eps_r6          eps_r6_ex
 #define NS_R6   0
-#define A6_k    A_from_sticking(S0_CO2, MW_CO2, SITE_DEN_Pt, q_R6)
+#define A6_k    A_from_sticking(S0_CO2, MW_CO2, q_R6)
 #define B6_beta 0.5
 #define Ea6_Jpm 0.0     /* [J/kmol] */
 
@@ -292,7 +291,7 @@ static const real eps_r7_ex[]        = {0.0};
 #define mu_r7           mu_r7_ex
 #define eps_r7          eps_r7_ex
 #define NS_R7   0
-#define A7_k    A_from_sticking(S0_CO, MW_CO, SITE_DEN_Pt, q_R7)
+#define A7_k    A_from_sticking(S0_CO, MW_CO, q_R7)
 #define B7_beta 0.5
 #define Ea7_Jpm 0.0     /* [J/kmol] */
 
@@ -304,7 +303,7 @@ static const real eps_r48_ex[]        = {0.0};
 #define mu_r48           mu_r48_ex
 #define eps_r48          eps_r48_ex
 #define NS_R48   0
-#define A48_k    A_from_sticking(S0_NO, MW_NO, SITE_DEN_Pt, q_R48)
+#define A48_k    A_from_sticking(S0_NO, MW_NO, q_R48)
 #define B48_beta 0.5
 #define Ea48_Jpm 0.0     /* [J/kmol] */
 
@@ -316,7 +315,7 @@ static const real eps_r53_ex[]        = {0.0};
 #define mu_r53           mu_r53_ex
 #define eps_r53          eps_r53_ex
 #define NS_R53   1      // competition species number
-#define A53_k    A_from_sticking(S1_O2, MW_O2, SITE_DEN_Rh, q_R53)
+#define A53_k    A_from_sticking(S1_O2, MW_O2, q_R53)
 #define B53_beta 0.5
 #define Ea53_Jpm 0.0     /* [J/kmol] */
 
@@ -328,7 +327,7 @@ static const real eps_r54_ex[]        = {0.0};
 #define mu_r54           mu_r54_ex
 #define eps_r54          eps_r54_ex
 #define NS_R54   0
-#define A54_k    A_from_sticking(S1_CO, MW_CO, SITE_DEN_Rh, q_R54)
+#define A54_k    A_from_sticking(S1_CO, MW_CO, q_R54)
 #define B54_beta 0.5
 #define Ea54_Jpm 0.0     /* [J/kmol] */
 
@@ -340,7 +339,7 @@ static const real eps_r55_ex[]        = {0.0};
 #define mu_r55           mu_r55_ex
 #define eps_r55          eps_r55_ex
 #define NS_R55   0
-#define A55_k    A_from_sticking(S1_NO, MW_NO, SITE_DEN_Rh, q_R55)
+#define A55_k    A_from_sticking(S1_NO, MW_NO, q_R55)
 #define B55_beta 0.5
 #define Ea55_Jpm 0.0     /* [J/kmol] */
 
