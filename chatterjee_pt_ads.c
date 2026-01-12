@@ -171,10 +171,11 @@ static inline real k_surface_covdep(real A, real beta, real Ea_J_per_kmol, real 
     const real Tpos  = MAX(EPS, T);
     const real invRT = 1.0 / (UNIVERSAL_GAS_CONSTANT * Tpos);
     real ln_k = log(MAX(EPS, A)) + beta*log(Tpos) - Ea_J_per_kmol*invRT;
+    int i;
 
     /* coverage loop                */
     /* Ns=0 -> independent coverage */
-    for (int i = 0; i < Ns; ++i) {
+    for (i = 0; i < Ns; ++i) {
         const int  si   = idx_site ? idx_site[i] : 0; /* Ns=0 -> no loop */
         const real th   = MAX(1.0e-20, CLAMP01(yi[si]));
         const real mui  = mu  ? mu[i]  : 0.0;
@@ -197,7 +198,8 @@ static inline real gas_conc_cell(cell_t c0, Thread *t0, real yi_k, real MW_k)
 static inline real A_from_sticking(real S0, real M_kg_per_kmol, real Gamma_kmol_m2, real q_site)
 {
     const real root = sqrt( UNIVERSAL_GAS_CONSTANT / MAX(EPS, 2.0*M_PI*M_kg_per_kmol) ); /*  [m/s]/sqrt(K) */
-    const real invG = pow( 1.0 / MAX(EPS, Gamma_kmol_m2), q_site );
+    (void)Gamma_kmol_m2;
+    const real invG = pow( 1.0 / MAX(EPS, SITE_DEN_TOT), q_site );
     return S0 * root * invG;  /* [m/s]*(1/gamma^q) */
 }
 
