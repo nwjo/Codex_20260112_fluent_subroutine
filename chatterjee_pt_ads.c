@@ -124,7 +124,7 @@
 // site requirement = reaction order for adsorption reaction
 #define q_R1    2.0
 #define q_R2    2.0
-#define q_R3    1.0
+#define q_R3    2.0
 #define q_R4    2.0
 #define q_R5    1.0
 #define q_R6    1.0
@@ -444,7 +444,7 @@ static const real eps_r15_ex[]        = {0.0};
 #define mu_r15           mu_r15_ex
 #define eps_r15          eps_r15_ex
 #define NS_R15   0
-#define A15_k    3.7E14
+#define A15_k    3.7E16
 #define B15_beta 0.0
 #define Ea15_Jpm 9.5E7     /* [J/kmol] */
 
@@ -457,7 +457,7 @@ static const real eps_r16_ex[]        = {0.0};
 #define mu_r16           mu_r16_ex
 #define eps_r16          eps_r16_ex
 #define NS_R16   0
-#define A16_k    1.0E13
+#define A16_k    1.0E12
 #define B16_beta 0.0
 #define Ea16_Jpm 7.54E7     /* [J/kmol] */
 
@@ -901,14 +901,14 @@ static const real eps_r56_ex[]        = {0.0};
 #define mu_r56           mu_r56_ex
 #define eps_r56          eps_r56_ex
 #define NS_R56   0
-#define A56_k    3.7E20
+#define A56_k    3.0E20
 #define B56_beta 0.0
 #define Ea56_Jpm 2.933E8     /* [J/kmol] */
 
 /* R57: 2 O(s) desorption on 2 Pt(s) */
 static const int  idx_site_r57_ex[]   = {IDX_CO_Rh, IDX_N_Rh};
 static const real mu_r57_ex[]         = {0.0, 0.0};
-static const real eps_r57_ex[]        = {1.9E7, 4.2E7};
+static const real eps_r57_ex[]        = {1.88E7, 4.19E7};
 #define idx_site_r57     idx_site_r57_ex
 #define mu_r57           mu_r57_ex
 #define eps_r57          eps_r57_ex
@@ -932,7 +932,7 @@ static const real eps_r58_ex[]        = {0.0};
 /* R59: 2 O(s) desorption on 2 Pt(s) */
 static const int  idx_site_r59_ex[]   = {IDX_N_Rh};
 static const real mu_r59_ex[]         = {0.0};
-static const real eps_r59_ex[]        = {1.7E7};
+static const real eps_r59_ex[]        = {1.67E7};
 #define idx_site_r59     idx_site_r59_ex
 #define mu_r59           mu_r59_ex
 #define eps_r59          eps_r59_ex
