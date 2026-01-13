@@ -32,10 +32,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#ifndef CLAMP01
-#define CLAMP01(x) ((x) < 0.0 ? 0.0 : ((x) > 1.0 ? 1.0 : (x)))
-#endif
-
 /* string match check */
 #ifndef STREQ
 #define STREQ(a,b) (strcmp((a),(b))==0)
@@ -191,7 +187,7 @@ static inline real k_surface_covdep(real A, real beta, real Ea_J_per_kmol, real 
     /* Ns=0 -> independent coverage */
     for (i = 0; i < Ns; ++i) {
         const int  si   = idx_site ? idx_site[i] : 0; /* Ns=0 -> no loop */
-        const real th   = MAX(1.0e-20, CLAMP01(yi[si]));
+        const real th   = MAX(1.0e-20, yi[si]);
         const real mui  = mu  ? mu[i]  : 0.0;
         const real epsi = eps_J_per_kmol ? eps_J_per_kmol[i] : 0.0;
         ln_k += mui * log(th) + (epsi * th) * invRT;
@@ -209,10 +205,10 @@ static inline real gas_conc_cell(cell_t c0, Thread *t0, real yi_k, real MW_k)
 
 
 /* calculate sticking coefficient */
-static inline real A_from_sticking(real S0, real M_kg_per_kmol, real q_site)
+static inline real A_from_sticking(real S0, real M_kg_per_kmol, real Gamma_kmol_m2, real q_site)
 {
     const real root = sqrt( UNIVERSAL_GAS_CONSTANT / MAX(EPS, 2.0*M_PI*M_kg_per_kmol) ); /*  [m/s]/sqrt(K) */
-    const real invG = pow( 1.0 / MAX(EPS, SITE_DEN_TOT), q_site );
+    const real invG = pow( 1.0 / MAX(EPS, Gamma_kmol_m2), q_site );
     return S0 * root * invG;  /* [m/s]*(1/gamma^q) */
 }
 
@@ -233,7 +229,7 @@ static const real eps_r1_ex[]        = {0.0};
 #define mu_r1           mu_r1_ex
 #define eps_r1          eps_r1_ex
 #define NS_R1   0       /* coverage denpendency species number -> 0 for independent */
-#define A1_k    A_from_sticking(S0_O2, MW_O2, q_R1)
+#define A1_k    A_from_sticking(S0_O2, MW_O2, SITE_DEN_Pt, q_R1)
 #define B1_beta 0.5
 #define Ea1_Jpm 0.0     /* [J/kmol] */
 
@@ -245,7 +241,7 @@ static const real eps_r2_ex[]        = {0.0};
 #define mu_r2           mu_r2_ex
 #define eps_r2          eps_r2_ex
 #define NS_R2   0
-#define A2_k    A_from_sticking(S0_C3H6, MW_C3H6, q_R2)
+#define A2_k    A_from_sticking(S0_C3H6, MW_C3H6, SITE_DEN_Pt, q_R2)
 #define B2_beta 0.5
 #define Ea2_Jpm 0.0     /* [J/kmol] */
 
@@ -257,7 +253,7 @@ static const real eps_r3_ex[]      = { 0.0         };
 #define mu_r3           mu_r3_ex
 #define eps_r3          eps_r3_ex
 #define NS_R3   1       /* Pt(s) */
-#define A3_k    A_from_sticking(S0_C3H6_O, MW_C3H6, q_R3)
+#define A3_k    A_from_sticking(S0_C3H6_O, MW_C3H6, SITE_DEN_Pt, q_R3)
 #define B3_beta 0.5
 #define Ea3_Jpm 0.0     /* [J/kmol] */
 
@@ -269,7 +265,7 @@ static const real eps_r4_ex[]        = { 0.0        };
 #define mu_r4           mu_r4_ex
 #define eps_r4          eps_r4_ex
 #define NS_R4   1
-#define A4_k    A_from_sticking(S0_H2, MW_H2, q_R4)
+#define A4_k    A_from_sticking(S0_H2, MW_H2, SITE_DEN_Pt, q_R4)
 #define B4_beta 0.5
 #define Ea4_Jpm 0.0     /* [J/kmol] */
 
@@ -281,7 +277,7 @@ static const real eps_r5_ex[]        = {0.0};
 #define mu_r5           mu_r5_ex
 #define eps_r5          eps_r5_ex
 #define NS_R5   0
-#define A5_k    A_from_sticking(S0_H2O, MW_H2O, q_R5)
+#define A5_k    A_from_sticking(S0_H2O, MW_H2O, SITE_DEN_Pt, q_R5)
 #define B5_beta 0.5
 #define Ea5_Jpm 0.0     /* [J/kmol] */
 
@@ -293,7 +289,7 @@ static const real eps_r6_ex[]        = {0.0};
 #define mu_r6           mu_r6_ex
 #define eps_r6          eps_r6_ex
 #define NS_R6   0
-#define A6_k    A_from_sticking(S0_CO2, MW_CO2, q_R6)
+#define A6_k    A_from_sticking(S0_CO2, MW_CO2, SITE_DEN_Pt, q_R6)
 #define B6_beta 0.5
 #define Ea6_Jpm 0.0     /* [J/kmol] */
 
@@ -305,7 +301,7 @@ static const real eps_r7_ex[]        = {0.0};
 #define mu_r7           mu_r7_ex
 #define eps_r7          eps_r7_ex
 #define NS_R7   0
-#define A7_k    A_from_sticking(S0_CO, MW_CO, q_R7)
+#define A7_k    A_from_sticking(S0_CO, MW_CO, SITE_DEN_Pt, q_R7)
 #define B7_beta 0.5
 #define Ea7_Jpm 0.0     /* [J/kmol] */
 
@@ -317,7 +313,7 @@ static const real eps_r48_ex[]        = {0.0};
 #define mu_r48           mu_r48_ex
 #define eps_r48          eps_r48_ex
 #define NS_R48   0
-#define A48_k    A_from_sticking(S0_NO, MW_NO, q_R48)
+#define A48_k    A_from_sticking(S0_NO, MW_NO, SITE_DEN_Pt, q_R48)
 #define B48_beta 0.5
 #define Ea48_Jpm 0.0     /* [J/kmol] */
 
@@ -329,7 +325,7 @@ static const real eps_r53_ex[]        = {0.0};
 #define mu_r53           mu_r53_ex
 #define eps_r53          eps_r53_ex
 #define NS_R53   1      // competition species number
-#define A53_k    A_from_sticking(S1_O2, MW_O2, q_R53)
+#define A53_k    A_from_sticking(S1_O2, MW_O2, SITE_DEN_Rh, q_R53)
 #define B53_beta 0.5
 #define Ea53_Jpm 0.0     /* [J/kmol] */
 
@@ -341,7 +337,7 @@ static const real eps_r54_ex[]        = {0.0};
 #define mu_r54           mu_r54_ex
 #define eps_r54          eps_r54_ex
 #define NS_R54   0
-#define A54_k    A_from_sticking(S1_CO, MW_CO, q_R54)
+#define A54_k    A_from_sticking(S1_CO, MW_CO, SITE_DEN_Rh, q_R54)
 #define B54_beta 0.5
 #define Ea54_Jpm 0.0     /* [J/kmol] */
 
@@ -353,7 +349,7 @@ static const real eps_r55_ex[]        = {0.0};
 #define mu_r55           mu_r55_ex
 #define eps_r55          eps_r55_ex
 #define NS_R55   0
-#define A55_k    A_from_sticking(S1_NO, MW_NO, q_R55)
+#define A55_k    A_from_sticking(S1_NO, MW_NO, SITE_DEN_Rh, q_R55)
 #define B55_beta 0.5
 #define Ea55_Jpm 0.0     /* [J/kmol] */
 
@@ -987,20 +983,20 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     /* Thiele correction excluded (eta = 1.0 for all reactions) */
     const real eta_dummy = 1.0;
 
-    const real theta_pt_vac = CLAMP01(yi[IDX_Pt_Vac]);
-    const real theta_rh_vac = CLAMP01(yi[IDX_Rh_Vac]);
+    const real theta_pt_vac = yi[IDX_Pt_Vac];
+    const real theta_rh_vac = yi[IDX_Rh_Vac];
 
-    const real Cv_R1 = pow(MAX(EPS, SITE_DEN_Pt * theta_pt_vac), q_R1);    // [kmol/m^2]
-    const real Cv_R2 = pow(MAX(EPS, SITE_DEN_Pt * theta_pt_vac), q_R2);
-    const real Cv_R3 = pow(MAX(EPS, SITE_DEN_Pt * theta_pt_vac), q_R3);
-    const real Cv_R4 = pow(MAX(EPS, SITE_DEN_Pt * theta_pt_vac), q_R4);
-    const real Cv_R5 = pow(MAX(EPS, SITE_DEN_Pt * theta_pt_vac), q_R5);
-    const real Cv_R6 = pow(MAX(EPS, SITE_DEN_Pt * theta_pt_vac), q_R6);
-    const real Cv_R7 = pow(MAX(EPS, SITE_DEN_Pt * theta_pt_vac), q_R7);
-    const real Cv_R48 = pow(MAX(EPS, SITE_DEN_Pt * theta_pt_vac), q_R48);
-    const real Cv_R53 = pow(MAX(EPS, SITE_DEN_Rh * theta_rh_vac), q_R53);
-    const real Cv_R54 = pow(MAX(EPS, SITE_DEN_Rh * theta_rh_vac), q_R54);
-    const real Cv_R55 = pow(MAX(EPS, SITE_DEN_Rh * theta_rh_vac), q_R55);
+    const real Cv_R1 = pow(SITE_DEN_Pt * theta_pt_vac, q_R1);    // [kmol/m^2]
+    const real Cv_R2 = pow(SITE_DEN_Pt * theta_pt_vac, q_R2);
+    const real Cv_R3 = pow(SITE_DEN_Pt * theta_pt_vac, q_R3);
+    const real Cv_R4 = pow(SITE_DEN_Pt * theta_pt_vac, q_R4);
+    const real Cv_R5 = pow(SITE_DEN_Pt * theta_pt_vac, q_R5);
+    const real Cv_R6 = pow(SITE_DEN_Pt * theta_pt_vac, q_R6);
+    const real Cv_R7 = pow(SITE_DEN_Pt * theta_pt_vac, q_R7);
+    const real Cv_R48 = pow(SITE_DEN_Pt * theta_pt_vac, q_R48);
+    const real Cv_R53 = pow(SITE_DEN_Rh * theta_rh_vac, q_R53);
+    const real Cv_R54 = pow(SITE_DEN_Rh * theta_rh_vac, q_R54);
+    const real Cv_R55 = pow(SITE_DEN_Rh * theta_rh_vac, q_R55);
 
     /* ======================= reaction-01 ======================= */
     {
@@ -1086,7 +1082,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
         const real k8 = k_surface_covdep(A8_k, B8_beta, Ea8_Jpm, Tw,
                                                  idx_site_r8, mu_r8, eps_r8, NS_R8, yi);
 
-                const real theta_O = CLAMP01(yi[IDX_O_Pt]);
+                const real theta_O = yi[IDX_O_Pt];
                 const real rate_base = k8 * theta_O * theta_O * SITE_DEN_Pt * SITE_DEN_Pt; /* kmol/m^2-s */
 
                 /* desorption: pore diffusion effectiveness = 1.0 (no gas reactant) */
@@ -1099,7 +1095,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k9 = k_surface_covdep(A9_k, B9_beta, Ea9_Jpm, Tw,
                                                  idx_site_r9, mu_r9, eps_r9, NS_R9, yi);
-                const real theta = CLAMP01(yi[IDX_C3H6_Pt]);
+                const real theta = yi[IDX_C3H6_Pt];
                 const real rate_base = k9 * theta * SITE_DEN_Pt;
                 const real rate = rate_base * Wash_F * eta_dummy;
                 R[9] = rate;
@@ -1109,8 +1105,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k10 = k_surface_covdep(A10_k, B10_beta, Ea10_Jpm, Tw,
                                                   idx_site_r10, mu_r10, eps_r10, NS_R10, yi);
-                const real thC3H5 = CLAMP01(yi[IDX_C3H5_Pt]);
-                const real thOH = CLAMP01(yi[IDX_OH_Pt]);
+                const real thC3H5 = yi[IDX_C3H5_Pt];
+                const real thOH = yi[IDX_OH_Pt];
                 const real rate_base = k10 * thC3H5 * SITE_DEN_Pt * thOH * SITE_DEN_Pt;
                 const real rate = rate_base * Wash_F * eta_dummy;
                 R[10] = rate;
@@ -1120,7 +1116,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k11 = k_surface_covdep(A11_k, B11_beta, Ea11_Jpm, Tw,
                                                   idx_site_r11, mu_r11, eps_r11, NS_R11, yi);
-                const real thH = CLAMP01(yi[IDX_H_Pt]);
+                const real thH = yi[IDX_H_Pt];
                 const real rate = (k11 * thH * thH * SITE_DEN_Pt * SITE_DEN_Pt) * Wash_F * eta_dummy;
                 R[11] = rate;
     }
@@ -1129,7 +1125,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k12 = k_surface_covdep(A12_k, B12_beta, Ea12_Jpm, Tw,
                                                   idx_site_r12, mu_r12, eps_r12, NS_R12, yi);
-                const real thH2O = CLAMP01(yi[IDX_H2O_Pt]);
+                const real thH2O = yi[IDX_H2O_Pt];
                 const real rate = (k12 * thH2O * SITE_DEN_Pt) * Wash_F * eta_dummy;
                 R[12] = rate;
     }
@@ -1138,7 +1134,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k13 = k_surface_covdep(A13_k, B13_beta, Ea13_Jpm, Tw,
                                                   idx_site_r13, mu_r13, eps_r13, NS_R13, yi);
-                const real thCO = CLAMP01(yi[IDX_CO_Pt]);
+                const real thCO = yi[IDX_CO_Pt];
                 const real rate_base = (k13 * thCO * SITE_DEN_Pt);
 
 
@@ -1149,7 +1145,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k14 = k_surface_covdep(A14_k, B14_beta, Ea14_Jpm, Tw,
                                                   idx_site_r14, mu_r14, eps_r14, NS_R14, yi);
-                const real thCO2 = CLAMP01(yi[IDX_CO2_Pt]);
+                const real thCO2 = yi[IDX_CO2_Pt];
                 const real rate = (k14 * thCO2 * SITE_DEN_Pt) * Wash_F * eta_dummy;
                 R[14] = rate;
     }
@@ -1158,8 +1154,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k15 = k_surface_covdep(A15_k, B15_beta, Ea15_Jpm, Tw,
                                                   idx_site_r15, mu_r15, eps_r15, NS_R15, yi);
-                const real thC3H5 = CLAMP01(yi[IDX_C3H5_Pt]);
-                const real thO = CLAMP01(yi[IDX_O_Pt]);
+                const real thC3H5 = yi[IDX_C3H5_Pt];
+                const real thO = yi[IDX_O_Pt];
                 const real cC3H5 = thC3H5 * SITE_DEN_Pt;
                 const real cO = thO * SITE_DEN_Pt;
                 R[15] = (k15 * cC3H5 * cO * cO * cO * cO * cO) * Wash_F * eta_dummy;
@@ -1169,8 +1165,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k16 = k_surface_covdep(A16_k, B16_beta, Ea16_Jpm, Tw,
                                                   idx_site_r16, mu_r16, eps_r16, NS_R16, yi);
-                const real thC3H6 = CLAMP01(yi[IDX_C3H6_Pt]);
-                const real thH = CLAMP01(yi[IDX_H_Pt]);
+                const real thC3H6 = yi[IDX_C3H6_Pt];
+                const real thH = yi[IDX_H_Pt];
                 R[16] = (k16 * thC3H6 * SITE_DEN_Pt * thH * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1178,8 +1174,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k17 = k_surface_covdep(A17_k, B17_beta, Ea17_Jpm, Tw,
                                                   idx_site_r17, mu_r17, eps_r17, NS_R17, yi);
-                const real thCC2H5 = CLAMP01(yi[IDX_CC2H5_Pt]);
-                const real thH = CLAMP01(yi[IDX_H_Pt]);
+                const real thCC2H5 = yi[IDX_CC2H5_Pt];
+                const real thH = yi[IDX_H_Pt];
                 R[17] = (k17 * thCC2H5 * SITE_DEN_Pt * thH * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1187,8 +1183,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k18 = k_surface_covdep(A18_k, B18_beta, Ea18_Jpm, Tw,
                                                   idx_site_r18, mu_r18, eps_r18, NS_R18, yi);
-                const real thCC2H5 = CLAMP01(yi[IDX_CC2H5_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thCC2H5 = yi[IDX_CC2H5_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[18] = (k18 * thCC2H5 * SITE_DEN_Pt * thPt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1196,8 +1192,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k19 = k_surface_covdep(A19_k, B19_beta, Ea19_Jpm, Tw,
                                                   idx_site_r19, mu_r19, eps_r19, NS_R19, yi);
-                const real thC2H3 = CLAMP01(yi[IDX_C2H3_Pt]);
-                const real thCH2 = CLAMP01(yi[IDX_CH2_Pt]);
+                const real thC2H3 = yi[IDX_C2H3_Pt];
+                const real thCH2 = yi[IDX_CH2_Pt];
                 R[19] = (k19 * thC2H3 *  SITE_DEN_Pt * thCH2 *  SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1205,8 +1201,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k20 = k_surface_covdep(A20_k, B20_beta, Ea20_Jpm, Tw,
                                                   idx_site_r20, mu_r20, eps_r20, NS_R20, yi);
-                const real thC2H3 = CLAMP01(yi[IDX_C2H3_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thC2H3 = yi[IDX_C2H3_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[20] = (k20 * thC2H3 * SITE_DEN_Pt * thPt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1214,8 +1210,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k21 = k_surface_covdep(A21_k, B21_beta, Ea21_Jpm, Tw,
                                                   idx_site_r21, mu_r21, eps_r21, NS_R21, yi);
-                const real thCH3 = CLAMP01(yi[IDX_CH3_Pt]);
-                const real thC = CLAMP01(yi[IDX_C_Pt]);
+                const real thCH3 = yi[IDX_CH3_Pt];
+                const real thC = yi[IDX_C_Pt];
                 R[21] = (k21 * thCH3 * SITE_DEN_Pt * thC * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1223,8 +1219,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k22 = k_surface_covdep(A22_k, B22_beta, Ea22_Jpm, Tw,
                                                   idx_site_r22, mu_r22, eps_r22, NS_R22, yi);
-                const real thCH3 = CLAMP01(yi[IDX_CH3_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thCH3 = yi[IDX_CH3_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[22] = (k22 * thCH3 * SITE_DEN_Pt * thPt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1232,8 +1228,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k23 = k_surface_covdep(A23_k, B23_beta, Ea23_Jpm, Tw,
                                                   idx_site_r23, mu_r23, eps_r23, NS_R23, yi);
-                const real thCH2 = CLAMP01(yi[IDX_CH2_Pt]);
-                const real thH = CLAMP01(yi[IDX_H_Pt]);
+                const real thCH2 = yi[IDX_CH2_Pt];
+                const real thH = yi[IDX_H_Pt];
                 R[23] = (k23 * SITE_DEN_Pt * thCH2 * thH * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1241,8 +1237,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k24 = k_surface_covdep(A24_k, B24_beta, Ea24_Jpm, Tw,
                                                   idx_site_r24, mu_r24, eps_r24, NS_R24, yi);
-                const real thCH2 = CLAMP01(yi[IDX_CH2_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thCH2 = yi[IDX_CH2_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[24] = (k24 * thCH2 * thPt * SITE_DEN_Pt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1250,8 +1246,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k25 = k_surface_covdep(A25_k, B25_beta, Ea25_Jpm, Tw,
                                                   idx_site_r25, mu_r25, eps_r25, NS_R25, yi);
-                const real thCH = CLAMP01(yi[IDX_CH_Pt]);
-                const real thH = CLAMP01(yi[IDX_H_Pt]);
+                const real thCH = yi[IDX_CH_Pt];
+                const real thH = yi[IDX_H_Pt];
                 R[25] = (k25 * thCH * thH * SITE_DEN_Pt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1259,8 +1255,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k26 = k_surface_covdep(A26_k, B26_beta, Ea26_Jpm, Tw,
                                                   idx_site_r26, mu_r26, eps_r26, NS_R26, yi);
-                const real thCH = CLAMP01(yi[IDX_CH_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thCH = yi[IDX_CH_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[26] = (k26 * thCH * thPt * SITE_DEN_Pt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1268,8 +1264,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k27 = k_surface_covdep(A27_k, B27_beta, Ea27_Jpm, Tw,
                                                   idx_site_r27, mu_r27, eps_r27, NS_R27, yi);
-                const real thC = CLAMP01(yi[IDX_C_Pt]);
-                const real thH = CLAMP01(yi[IDX_H_Pt]);
+                const real thC = yi[IDX_C_Pt];
+                const real thH = yi[IDX_H_Pt];
                 R[27] = (k27 * thC * thH * SITE_DEN_Pt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1277,8 +1273,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k28 = k_surface_covdep(A28_k, B28_beta, Ea28_Jpm, Tw,
                                                   idx_site_r28, mu_r28, eps_r28, NS_R28, yi);
-                const real thC2H3 = CLAMP01(yi[IDX_C2H3_Pt]);
-                const real thO = CLAMP01(yi[IDX_O_Pt]);
+                const real thC2H3 = yi[IDX_C2H3_Pt];
+                const real thO = yi[IDX_O_Pt];
                 R[28] = (k28 * thC2H3 * SITE_DEN_Pt * thO * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1286,8 +1282,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k29 = k_surface_covdep(A29_k, B29_beta, Ea29_Jpm, Tw,
                                                   idx_site_r29, mu_r29, eps_r29, NS_R29, yi);
-                const real thCH3CO = CLAMP01(yi[IDX_CH3CO_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thCH3CO = yi[IDX_CH3CO_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[29] = (k29 * thCH3CO * SITE_DEN_Pt * thPt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1295,8 +1291,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k30 = k_surface_covdep(A30_k, B30_beta, Ea30_Jpm, Tw,
                                                   idx_site_r30, mu_r30, eps_r30, NS_R30, yi);
-                const real thCH3 = CLAMP01(yi[IDX_CH3_Pt]);
-                const real thCO = CLAMP01(yi[IDX_CO_Pt]);
+                const real thCH3 = yi[IDX_CH3_Pt];
+                const real thCO = yi[IDX_CO_Pt];
                 R[30] = (k30 * thCH3* SITE_DEN_Pt * thCO * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1304,8 +1300,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k31 = k_surface_covdep(A31_k, B31_beta, Ea31_Jpm, Tw,
                                                   idx_site_r31, mu_r31, eps_r31, NS_R31, yi);
-                const real thCH3CO = CLAMP01(yi[IDX_CH3CO_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thCH3CO = yi[IDX_CH3CO_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[31] = (k31 * thCH3CO * SITE_DEN_Pt * thPt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1313,8 +1309,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k32 = k_surface_covdep(A32_k, B32_beta, Ea32_Jpm, Tw,
                                                   idx_site_r32, mu_r32, eps_r32, NS_R32, yi);
-                const real thCH3 = CLAMP01(yi[IDX_CH3_Pt]);
-                const real thO = CLAMP01(yi[IDX_O_Pt]);
+                const real thCH3 = yi[IDX_CH3_Pt];
+                const real thO = yi[IDX_O_Pt];
                 R[32] = (k32 * thCH3 * SITE_DEN_Pt * thO * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1322,8 +1318,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k33 = k_surface_covdep(A33_k, B33_beta, Ea33_Jpm, Tw,
                                                   idx_site_r33, mu_r33, eps_r33, NS_R33, yi);
-                const real thCH2 = CLAMP01(yi[IDX_CH2_Pt]);
-                const real thOH = CLAMP01(yi[IDX_OH_Pt]);
+                const real thCH2 = yi[IDX_CH2_Pt];
+                const real thOH = yi[IDX_OH_Pt];
                 R[33] = (k33 * thCH2 * SITE_DEN_Pt * thOH * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1331,8 +1327,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k34 = k_surface_covdep(A34_k, B34_beta, Ea34_Jpm, Tw,
                                                   idx_site_r34, mu_r34, eps_r34, NS_R34, yi);
-                const real thCH2 = CLAMP01(yi[IDX_CH2_Pt]);
-                const real thO = CLAMP01(yi[IDX_O_Pt]);
+                const real thCH2 = yi[IDX_CH2_Pt];
+                const real thO = yi[IDX_O_Pt];
                 R[34] = (k34 * thCH2 * SITE_DEN_Pt * thO * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1340,8 +1336,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k35 = k_surface_covdep(A35_k, B35_beta, Ea35_Jpm, Tw,
                                                   idx_site_r35, mu_r35, eps_r35, NS_R35, yi);
-                const real thCH = CLAMP01(yi[IDX_CH_Pt]);
-                const real thOH = CLAMP01(yi[IDX_OH_Pt]);
+                const real thCH = yi[IDX_CH_Pt];
+                const real thOH = yi[IDX_OH_Pt];
                 R[35] = (k35 * thCH * SITE_DEN_Pt * thOH * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1349,8 +1345,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k36 = k_surface_covdep(A36_k, B36_beta, Ea36_Jpm, Tw,
                                                   idx_site_r36, mu_r36, eps_r36, NS_R36, yi);
-                const real thCH = CLAMP01(yi[IDX_CH_Pt]);
-                const real thO = CLAMP01(yi[IDX_O_Pt]);
+                const real thCH = yi[IDX_CH_Pt];
+                const real thO = yi[IDX_O_Pt];
                 R[36] = (k36 * thCH * SITE_DEN_Pt * thO * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1358,8 +1354,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k37 = k_surface_covdep(A37_k, B37_beta, Ea37_Jpm, Tw,
                                                   idx_site_r37, mu_r37, eps_r37, NS_R37, yi);
-                const real thC = CLAMP01(yi[IDX_C_Pt]);
-                const real thOH = CLAMP01(yi[IDX_OH_Pt]);
+                const real thC = yi[IDX_C_Pt];
+                const real thOH = yi[IDX_OH_Pt];
                 R[37] = (k37 * thC * SITE_DEN_Pt * thOH * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1367,8 +1363,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k38 = k_surface_covdep(A38_k, B38_beta, Ea38_Jpm, Tw,
                                                   idx_site_r38, mu_r38, eps_r38, NS_R38, yi);
-                const real thO = CLAMP01(yi[IDX_O_Pt]);
-                const real thH = CLAMP01(yi[IDX_H_Pt]);
+                const real thO = yi[IDX_O_Pt];
+                const real thH = yi[IDX_H_Pt];
                 R[38] = (k38 * thO * SITE_DEN_Pt * thH * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1376,8 +1372,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k39 = k_surface_covdep(A39_k, B39_beta, Ea39_Jpm, Tw,
                                                   idx_site_r39, mu_r39, eps_r39, NS_R39, yi);
-                const real thOH = CLAMP01(yi[IDX_OH_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thOH = yi[IDX_OH_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[39] = (k39 * thOH * SITE_DEN_Pt * thPt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1385,8 +1381,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k40 = k_surface_covdep(A40_k, B40_beta, Ea40_Jpm, Tw,
                                                   idx_site_r40, mu_r40, eps_r40, NS_R40, yi);
-                const real thH = CLAMP01(yi[IDX_H_Pt]);
-                const real thOH = CLAMP01(yi[IDX_OH_Pt]);
+                const real thH = yi[IDX_H_Pt];
+                const real thOH = yi[IDX_OH_Pt];
                 R[40] = (k40 * thH * SITE_DEN_Pt * thOH * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1394,8 +1390,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k41 = k_surface_covdep(A41_k, B41_beta, Ea41_Jpm, Tw,
                                                   idx_site_r41, mu_r41, eps_r41, NS_R41, yi);
-                const real thH2O = CLAMP01(yi[IDX_H2O_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thH2O = yi[IDX_H2O_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[41] = (k41 * thH2O * SITE_DEN_Pt * thPt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1403,7 +1399,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k42 = k_surface_covdep(A42_k, B42_beta, Ea42_Jpm, Tw,
                                                   idx_site_r42, mu_r42, eps_r42, NS_R42, yi);
-                const real thOH = CLAMP01(yi[IDX_OH_Pt]);
+                const real thOH = yi[IDX_OH_Pt];
                 R[42] = (k42 * thOH * thOH * SITE_DEN_Pt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1411,8 +1407,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k43 = k_surface_covdep(A43_k, B43_beta, Ea43_Jpm, Tw,
                                                   idx_site_r43, mu_r43, eps_r43, NS_R43, yi);
-                const real thH2O = CLAMP01(yi[IDX_H2O_Pt]);
-                const real thO = CLAMP01(yi[IDX_O_Pt]);
+                const real thH2O = yi[IDX_H2O_Pt];
+                const real thO = yi[IDX_O_Pt];
                 R[43] = (k43 * thH2O * SITE_DEN_Pt * thO * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1421,8 +1417,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
         const real k44 = k_surface_covdep(A44_k, B44_beta, Ea44_Jpm, Tw,
                                                   idx_site_r44, mu_r44, eps_r44, NS_R44, yi);
 
-                const real theta_CO = CLAMP01(yi[IDX_CO_Pt]);
-                const real theta_O  = CLAMP01(yi[IDX_O_Pt]);
+                const real theta_CO = yi[IDX_CO_Pt];
+                const real theta_O  = yi[IDX_O_Pt];
 
                 const real rate_base = k44 * theta_CO * SITE_DEN_Pt * theta_O * SITE_DEN_Pt; /* kmol/m^2-s */
                 const real rate      = rate_base * Wash_F * eta_dummy;
@@ -1434,8 +1430,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k45 = k_surface_covdep(A45_k, B45_beta, Ea45_Jpm, Tw,
                                                   idx_site_r45, mu_r45, eps_r45, NS_R45, yi);
-                const real thCO2 = CLAMP01(yi[IDX_CO2_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thCO2 = yi[IDX_CO2_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 R[45] = (k45 * thCO2 * SITE_DEN_Pt * thPt * SITE_DEN_Pt) * Wash_F * eta_dummy;
     }
 
@@ -1443,8 +1439,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k46 = k_surface_covdep(A46_k, B46_beta, Ea46_Jpm, Tw,
                                                   idx_site_r46, mu_r46, eps_r46, NS_R46, yi);
-                const real thC = CLAMP01(yi[IDX_C_Pt]);
-                const real thO = CLAMP01(yi[IDX_O_Pt]);
+                const real thC = yi[IDX_C_Pt];
+                const real thO = yi[IDX_O_Pt];
                 const real rate = k46 * thC * thO * SITE_DEN_Pt * SITE_DEN_Pt * Wash_F * eta_dummy;
                 R[46] = rate;
     }
@@ -1453,8 +1449,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k47 = k_surface_covdep(A47_k, B47_beta, Ea47_Jpm, Tw,
                                                   idx_site_r47, mu_r47, eps_r47, NS_R47, yi);
-                const real thCO = CLAMP01(yi[IDX_CO_Pt]);
-                const real thPt = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thCO = yi[IDX_CO_Pt];
+                const real thPt = yi[IDX_Pt_Vac];
                 const real rate = k47 * thCO * SITE_DEN_Pt * thPt * SITE_DEN_Pt * Wash_F * eta_dummy;
                 R[47] = rate;
     }
@@ -1474,7 +1470,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k49 = k_surface_covdep(A49_k, B49_beta, Ea49_Jpm, Tw,
                                                   idx_site_r49, mu_r49, eps_r49, NS_R49, yi);
-                const real thNO = CLAMP01(yi[IDX_NO_Pt]);
+                const real thNO = yi[IDX_NO_Pt];
                 const real rate = k49 * thNO * SITE_DEN_Pt * Wash_F * eta_dummy; 
                 R[49] = rate;
     }
@@ -1483,7 +1479,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k50 = k_surface_covdep(A50_k, B50_beta, Ea50_Jpm, Tw,
                                                   idx_site_r50, mu_r50, eps_r50, NS_R50, yi);
-                const real thN = CLAMP01(yi[IDX_N_Pt]);
+                const real thN = yi[IDX_N_Pt];
                 const real rate = k50 * thN * thN * SITE_DEN_Pt * SITE_DEN_Pt * Wash_F * eta_dummy; 
                 R[50] = rate;
     }
@@ -1492,8 +1488,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k51 = k_surface_covdep(A51_k, B51_beta, Ea51_Jpm, Tw,
                                                   idx_site_r51, mu_r51, eps_r51, NS_R51, yi);
-                const real thNO  = CLAMP01(yi[IDX_NO_Pt]);
-                const real thVac = CLAMP01(yi[IDX_Pt_Vac]);
+                const real thNO  = yi[IDX_NO_Pt];
+                const real thVac = yi[IDX_Pt_Vac];
                 const real rate = k51 * thNO * thVac * SITE_DEN_Pt * SITE_DEN_Pt * Wash_F * eta_dummy; 
                 R[51] = rate;
     }
@@ -1502,8 +1498,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k52 = k_surface_covdep(A52_k, B52_beta, Ea52_Jpm, Tw,
                                                   idx_site_r52, mu_r52, eps_r52, NS_R52, yi);
-                const real thN = CLAMP01(yi[IDX_N_Pt]);
-                const real thO = CLAMP01(yi[IDX_O_Pt]);
+                const real thN = yi[IDX_N_Pt];
+                const real thO = yi[IDX_O_Pt];
                 const real rate = k52 * thN * thO * SITE_DEN_Pt * SITE_DEN_Pt * Wash_F * eta_dummy;
                 R[52] = rate;
     }
@@ -1543,7 +1539,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k56 = k_surface_covdep(A56_k, B56_beta, Ea56_Jpm, Tw,
                                                   idx_site_r56, mu_r56, eps_r56, NS_R56, yi);
-                const real thO_rh = CLAMP01(yi[IDX_O_Rh]);
+                const real thO_rh = yi[IDX_O_Rh];
                 const real rate = k56 * thO_rh * thO_rh * SITE_DEN_Rh * SITE_DEN_Rh * Wash_F * eta_dummy; 
                 R[56] = rate;
     }
@@ -1552,7 +1548,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k57 = k_surface_covdep(A57_k, B57_beta, Ea57_Jpm, Tw,
                                                   idx_site_r57, mu_r57, eps_r57, NS_R57, yi);
-                const real thCO_rh = CLAMP01(yi[IDX_CO_Rh]);
+                const real thCO_rh = yi[IDX_CO_Rh];
                 const real rate_base = k57 * thCO_rh * SITE_DEN_Rh;
 
                 R[57] = rate_base * Wash_F * eta_dummy;
@@ -1562,7 +1558,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k58 = k_surface_covdep(A58_k, B58_beta, Ea58_Jpm, Tw,
                                                   idx_site_r58, mu_r58, eps_r58, NS_R58, yi);
-                const real thNO_rh = CLAMP01(yi[IDX_NO_Rh]);
+                const real thNO_rh = yi[IDX_NO_Rh];
                 const real rate = k58 * thNO_rh * SITE_DEN_Rh * Wash_F * eta_dummy; 
                 R[58] = rate;
     }
@@ -1571,7 +1567,7 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k59 = k_surface_covdep(A59_k, B59_beta, Ea59_Jpm, Tw,
                                                   idx_site_r59, mu_r59, eps_r59, NS_R59, yi);
-                const real thN_rh = CLAMP01(yi[IDX_N_Rh]);
+                const real thN_rh = yi[IDX_N_Rh];
                 const real rate = k59 * thN_rh * thN_rh * SITE_DEN_Rh * SITE_DEN_Rh * Wash_F * eta_dummy; 
                 R[59] = rate;
     }
@@ -1580,8 +1576,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k60 = k_surface_covdep(A60_k, B60_beta, Ea60_Jpm, Tw,
                                                   idx_site_r60, mu_r60, eps_r60, NS_R60, yi);
-                const real thCO_rh = CLAMP01(yi[IDX_CO_Rh]);
-                const real thO_rh  = CLAMP01(yi[IDX_O_Rh]);
+                const real thCO_rh = yi[IDX_CO_Rh];
+                const real thO_rh  = yi[IDX_O_Rh];
                 const real rate = k60 * thCO_rh * thO_rh * SITE_DEN_Rh * SITE_DEN_Rh * Wash_F * eta_dummy;
                 R[60] = rate;
     }
@@ -1590,8 +1586,8 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
     {
         const real k61 = k_surface_covdep(A61_k, B61_beta, Ea61_Jpm, Tw,
                                                   idx_site_r61, mu_r61, eps_r61, NS_R61, yi);
-                const real thNO_rh  = CLAMP01(yi[IDX_NO_Rh]);
-                const real thVac_rh = CLAMP01(yi[IDX_Rh_Vac]);
+                const real thNO_rh  = yi[IDX_NO_Rh];
+                const real thVac_rh = yi[IDX_Rh_Vac];
                 const real rate = k61 * thNO_rh * thVac_rh * SITE_DEN_Rh * SITE_DEN_Rh * Wash_F * eta_dummy; 
                 R[61] = rate;
     }
