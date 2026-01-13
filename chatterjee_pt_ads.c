@@ -164,6 +164,20 @@ static real MW_CO_G = -1.0;                 /* CO mole global storage */
 
 #define TARGET_WALL_ID 7
 
+#ifndef JAC_ROW_MAJOR
+#define JAC_ROW_MAJOR 1
+#endif
+
+#define JAC_IDX(row, col, n) (JAC_ROW_MAJOR ? ((row) * (n) + (col)) : ((col) * (n) + (row)))
+
+#ifndef JAC_FD_CHECK
+#define JAC_FD_CHECK 0
+#endif
+
+#ifndef JAC_FD_ALL
+#define JAC_FD_ALL 1
+#endif
+
 
 
 static inline real k_surface_covdep(real A, real beta, real Ea_J_per_kmol, real T, const int *idx_site, const real *mu, const real *eps_J_per_kmol, int Ns, const real yi[])
@@ -1584,31 +1598,19 @@ static inline void chatterjee_compute_R(cell_t c0, Thread *t0, real Tw, const re
 
 }
 
-DEFINE_NET_REACTION_RATE(chatterjee_pt_ads_net, c, t, particle, pressure, temp, yi, rr, jac)
+static inline real chatterjee_site_density_for_index(int idx)
 {
-    int i;
-    int ns = n_spe;
-
-    (void)particle;
-    (void)pressure;
-
-    if (!temp || !yi || !rr) return;
-    if (ns <= IDX_N_Rh) return;
-
-    for (i = 0; i < ns; ++i) rr[i] = 0.0;
-    if (jac) {
-        int nn = ns * ns;
-        for (i = 0; i < nn; ++i) jac[i] = 0.0;
+    if (idx >= IDX_Rh_Vac && idx <= IDX_N_Rh) {
+        return SITE_DEN_Rh;
     }
+    if (idx >= IDX_Pt_Vac && idx <= IDX_CH3CO_Pt) {
+        return SITE_DEN_Pt;
+    }
+    return 0.0;
+}
 
-    {
-        const cell_t c0 = c;
-        Thread *t0 = t;
-        const real Tw = *temp;
-        real R[62];
-
-        chatterjee_compute_R(c0, t0, Tw, yi, R);
-
+static inline void chatterjee_apply_stoich(const real R[62], real rr[])
+{
     rr[IDX_O2] += -1.0 * R[1];  /* R1: O2 */
     rr[IDX_Pt_Vac] += -2.0 * R[1];  /* R1: Pt(S) */
     rr[IDX_O_Pt] += 2.0 * R[1];  /* R1: O(S) */
@@ -1830,5 +1832,92 @@ DEFINE_NET_REACTION_RATE(chatterjee_pt_ads_net, c, t, particle, pressure, temp, 
     rr[IDX_Rh_Vac] += -1.0 * R[61];  /* R61: Rh(S1) */
     rr[IDX_N_Rh] += 1.0 * R[61];  /* R61: N(S1) */
     rr[IDX_O_Rh] += 1.0 * R[61];  /* R61: O(S1) */
+}
+
+DEFINE_NET_REACTION_RATE(chatterjee_pt_ads_net, c, t, particle, pressure, temp, yi, rr, jac)
+{
+    int i;
+    int ns = n_spe;
+
+    (void)particle;
+    (void)pressure;
+
+    if (!temp || !yi || !rr) return;
+    if (ns <= IDX_N_Rh) return;
+
+    for (i = 0; i < ns; ++i) rr[i] = 0.0;
+    if (jac) {
+        int nn = ns * ns;
+        for (i = 0; i < nn; ++i) jac[i] = 0.0;
+    }
+
+    {
+        const cell_t c0 = c;
+        Thread *t0 = t;
+        const real Tw = *temp;
+        real R[62];
+
+        chatterjee_compute_R(c0, t0, Tw, yi, R);
+        chatterjee_apply_stoich(R, rr);
+
+        if (jac) {
+            const real rho = C_R(c0, t0);
+            const real eps_fd = 1.0e-6;
+            real rr_base[32];
+            real R_tmp[62];
+            real rr_tmp[32];
+            real yi_pert[32];
+            int j;
+
+            for (i = 0; i < ns; ++i) {
+                rr_base[i] = rr[i];
+            }
+
+            if (JAC_FD_ALL) {
+                for (j = 0; j < ns; ++j) {
+                    real Cj;
+                    real dC;
+                    real dyi;
+                    int k;
+
+                    for (k = 0; k < ns; ++k) {
+                        yi_pert[k] = yi[k];
+                        rr_tmp[k] = 0.0;
+                    }
+
+                    if (j <= IDX_N2) {
+                        const real MW_j = (j == IDX_O2) ? MW_O2 :
+                                          (j == IDX_C3H6) ? MW_C3H6 :
+                                          (j == IDX_H2) ? MW_H2 :
+                                          (j == IDX_H2O) ? MW_H2O :
+                                          (j == IDX_CO2) ? MW_CO2 :
+                                          (j == IDX_CO) ? MW_CO :
+                                          (j == IDX_NO) ? MW_NO :
+                                          (j == IDX_NO2) ? MW_NO2 :
+                                          MW_N2;
+                        Cj = (rho * yi[j]) / MAX(EPS, MW_j);
+                        dC = MAX(1.0e-12, fabs(Cj) * eps_fd);
+                        dyi = dC * MW_j / MAX(EPS, rho);
+                    } else {
+                        const real site_den = chatterjee_site_density_for_index(j);
+                        Cj = site_den * yi[j];
+                        dC = MAX(1.0e-12, fabs(Cj) * eps_fd);
+                        dyi = dC / MAX(EPS, site_den);
+                    }
+
+                    yi_pert[j] = yi[j] + dyi;
+                    chatterjee_compute_R(c0, t0, Tw, yi_pert, R_tmp);
+                    chatterjee_apply_stoich(R_tmp, rr_tmp);
+
+                    for (k = 0; k < ns; ++k) {
+                        jac[JAC_IDX(k, j, ns)] = (rr_tmp[k] - rr_base[k]) / dC;
+                    }
+                }
+            }
+
+#if JAC_FD_CHECK
+            Message("Jacobian finite-difference check enabled.\n");
+#endif
+        }
     }
 }
