@@ -216,7 +216,7 @@ static inline real A_from_sticking(real S0, real M_kg_per_kmol, real Gamma_kmol_
 
 
 
-/* ===== reaction parameters -> if no coverage dependecy, Ns=0/NULL ===== */
+/* ===== reaction parameters -> if no coverage dependency, Ns=0/NULL ===== */
 
 /* ======================= =================== ========================== */
 /* ======================= =================== ========================== */
@@ -324,7 +324,7 @@ static const real eps_r53_ex[]        = {0.0};
 #define idx_site_r53     idx_site_r53_ex
 #define mu_r53           mu_r53_ex
 #define eps_r53          eps_r53_ex
-#define NS_R53   1      // competition species number
+#define NS_R53   1      /* competition species count */
 #define A53_k    A_from_sticking(S1_O2, MW_O2, SITE_DEN_Rh, q_R53)
 #define B53_beta 0.5
 #define Ea53_Jpm 0.0     /* [J/kmol] */
@@ -397,7 +397,7 @@ static const real eps_r10_ex[]        = {0.0};
 /* R11: 2 H(s) desorption on 2 Pt(s) */
 static const int  idx_site_r11_ex[]   = {IDX_H_Pt};
 static const real mu_r11_ex[]         = {0.0};
-static const real eps_r11_ex[]        = {6.0E6};        //fixied 6.0E7 -> 6.0E6
+static const real eps_r11_ex[]        = {6.0E6};        /* fixed 6.0E7 -> 6.0E6 */
 #define idx_site_r11     idx_site_r11_ex
 #define mu_r11           mu_r11_ex
 #define eps_r11          eps_r11_ex
@@ -751,7 +751,7 @@ static const real eps_r39_ex[]        = {0.0};
 #define B39_beta 0.0
 #define Ea39_Jpm 7.49E7     /* [J/kmol] */
 
-/* R40: 2 O(s) desorption on 2 Pt(s) */
+/* R40: reaction parameters */
 static const int  idx_site_r40_ex[]   = {0};
 static const real mu_r40_ex[]         = {0.0};
 static const real eps_r40_ex[]        = {0.0};
@@ -763,7 +763,7 @@ static const real eps_r40_ex[]        = {0.0};
 #define B40_beta 0.0
 #define Ea40_Jpm 1.74E7     /* [J/kmol] */
 
-/* R41: 2 O(s) desorption on 2 Pt(s) */
+/* R41: reaction parameters */
 static const int  idx_site_r41_ex[]   = {0};
 static const real mu_r41_ex[]         = {0.0};
 static const real eps_r41_ex[]        = {0.0};
@@ -775,7 +775,7 @@ static const real eps_r41_ex[]        = {0.0};
 #define B41_beta 0.0
 #define Ea41_Jpm 7.36E7     /* [J/kmol] */
 
-/* R42: 2 O(s) desorption on 2 Pt(s) */
+/* R42: reaction parameters */
 static const int  idx_site_r42_ex[]   = {0};
 static const real mu_r42_ex[]         = {0.0};
 static const real eps_r42_ex[]        = {0.0};
@@ -787,7 +787,7 @@ static const real eps_r42_ex[]        = {0.0};
 #define B42_beta 0.0
 #define Ea42_Jpm 4.82E7     /* [J/kmol] */
 
-/* R43: 2 O(s) desorption on 2 Pt(s) */
+/* R43: reaction parameters */
 static const int  idx_site_r43_ex[]   = {0};
 static const real mu_r43_ex[]         = {0.0};
 static const real eps_r43_ex[]        = {0.0};
@@ -799,7 +799,7 @@ static const real eps_r43_ex[]        = {0.0};
 #define B43_beta 0.0
 #define Ea43_Jpm 4.1E7     /* [J/kmol] */
 
-/* R44: 2 O(s) desorption on 2 Pt(s) */
+/* R44: reaction parameters */
 static const int  idx_site_r44_ex[]   = {IDX_CO_Pt, IDX_NO_Pt};
 static const real mu_r44_ex[]         = {0.0, 0.0};
 static const real eps_r44_ex[]        = {3.3E7, -9.0E7};
@@ -811,7 +811,7 @@ static const real eps_r44_ex[]        = {3.3E7, -9.0E7};
 #define B44_beta 0.0
 #define Ea44_Jpm 1.08E8     /* [J/kmol] */
 
-/* R45: 2 O(s) desorption on 2 Pt(s) */
+/* R45: reaction parameters */
 static const int  idx_site_r45_ex[]   = {IDX_O_Pt};
 static const real mu_r45_ex[]         = {0.0};
 static const real eps_r45_ex[]        = {-4.5E7};
@@ -823,7 +823,7 @@ static const real eps_r45_ex[]        = {-4.5E7};
 #define B45_beta 0.0
 #define Ea45_Jpm 1.651E8     /* [J/kmol] */
 
-/* R46: 2 O(s) desorption on 2 Pt(s) */
+/* R46: reaction parameters */
 static const int  idx_site_r46_ex[]   = {IDX_CO_Pt};
 static const real mu_r46_ex[]         = {0.0};
 static const real eps_r46_ex[]        = {-3.3E7};
@@ -835,7 +835,7 @@ static const real eps_r46_ex[]        = {-3.3E7};
 #define B46_beta 0.0
 #define Ea46_Jpm 0.0     /* [J/kmol] */
 
-/* R47: 2 O(s) desorption on 2 Pt(s) */
+/* R47: reaction parameters */
 static const int  idx_site_r47_ex[]   = {IDX_O_Pt};
 static const real mu_r47_ex[]         = {0.0};
 static const real eps_r47_ex[]        = {-4.5E7};
@@ -851,7 +851,7 @@ static const real eps_r47_ex[]        = {-4.5E7};
 /* ======================= =================== ========================== */
 /* =======================   NO Reduction Pt   ========================== */
 
-/* R49: 2 O(s) desorption on 2 Pt(s) */
+/* R49: reaction parameters */
 static const int  idx_site_r49_ex[]   = {0};
 static const real mu_r49_ex[]         = {0.0};
 static const real eps_r49_ex[]        = {0.0};
@@ -863,7 +863,7 @@ static const real eps_r49_ex[]        = {0.0};
 #define B49_beta 0.0
 #define Ea49_Jpm 1.4E8     /* [J/kmol] */
 
-/* R50: 2 O(s) desorption on 2 Pt(s) */
+/* R50: reaction parameters */
 static const int  idx_site_r50_ex[]   = {IDX_CO_Pt};
 static const real mu_r50_ex[]         = {0.0};
 static const real eps_r50_ex[]        = {7.5E7};
@@ -875,7 +875,7 @@ static const real eps_r50_ex[]        = {7.5E7};
 #define B50_beta 0.0
 #define Ea50_Jpm 1.139E8     /* [J/kmol] */
 
-/* R51: 2 O(s) desorption on 2 Pt(s) */
+/* R51: reaction parameters */
 static const int  idx_site_r51_ex[]   = {IDX_CO_Pt};
 static const real mu_r51_ex[]         = {0.0};
 static const real eps_r51_ex[]        = {-3.0E6};
@@ -887,7 +887,7 @@ static const real eps_r51_ex[]        = {-3.0E6};
 #define B51_beta 0.0
 #define Ea51_Jpm 1.078E8     /* [J/kmol] */
 
-/* R52: 2 O(s) desorption on 2 Pt(s) */
+/* R52: reaction parameters */
 static const int  idx_site_r52_ex[]   = {IDX_O_Pt};
 static const real mu_r52_ex[]         = {0.0};
 static const real eps_r52_ex[]        = {4.5E7};
@@ -903,7 +903,7 @@ static const real eps_r52_ex[]        = {4.5E7};
 /* ======================= =================== ========================== */
 /* ======================= NO & CO Reduction Rh========================== */
 
-/* R56: 2 O(s) desorption on 2 Pt(s) */
+/* R56: reaction parameters */
 static const int  idx_site_r56_ex[]   = {0};
 static const real mu_r56_ex[]         = {0.0};
 static const real eps_r56_ex[]        = {0.0};
@@ -915,7 +915,7 @@ static const real eps_r56_ex[]        = {0.0};
 #define B56_beta 0.0
 #define Ea56_Jpm 2.933E8     /* [J/kmol] */
 
-/* R57: 2 O(s) desorption on 2 Pt(s) */
+/* R57: reaction parameters */
 static const int  idx_site_r57_ex[]   = {IDX_CO_Rh, IDX_N_Rh};
 static const real mu_r57_ex[]         = {0.0, 0.0};
 static const real eps_r57_ex[]        = {1.88E7, 4.19E7};
@@ -927,7 +927,7 @@ static const real eps_r57_ex[]        = {1.88E7, 4.19E7};
 #define B57_beta 0.0
 #define Ea57_Jpm 1.323E8     /* [J/kmol] */
 
-/* R58: 2 O(s) desorption on 2 Pt(s) */
+/* R58: reaction parameters */
 static const int  idx_site_r58_ex[]   = {0};
 static const real mu_r58_ex[]         = {0.0};
 static const real eps_r58_ex[]        = {0.0};
@@ -939,7 +939,7 @@ static const real eps_r58_ex[]        = {0.0};
 #define B58_beta 0.0
 #define Ea58_Jpm 1.089E8     /* [J/kmol] */
 
-/* R59: 2 O(s) desorption on 2 Pt(s) */
+/* R59: reaction parameters */
 static const int  idx_site_r59_ex[]   = {IDX_N_Rh};
 static const real mu_r59_ex[]         = {0.0};
 static const real eps_r59_ex[]        = {1.67E7};
@@ -951,7 +951,7 @@ static const real eps_r59_ex[]        = {1.67E7};
 #define B59_beta 0.0
 #define Ea59_Jpm 1.369E8     /* [J/kmol] */
 
-/* R60: 2 O(s) desorption on 2 Pt(s) */
+/* R60: reaction parameters */
 static const int  idx_site_r60_ex[]   = {0};
 static const real mu_r60_ex[]         = {0.0};
 static const real eps_r60_ex[]        = {0.0};
@@ -963,7 +963,7 @@ static const real eps_r60_ex[]        = {0.0};
 #define B60_beta 0.0
 #define Ea60_Jpm 5.99E7     /* [J/kmol] */
 
-/* R61: 2 O(s) desorption on 2 Pt(s) */
+/* R61: reaction parameters */
 static const int  idx_site_r61_ex[]   = {0};
 static const real mu_r61_ex[]         = {0.0};
 static const real eps_r61_ex[]        = {0.0};
